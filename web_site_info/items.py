@@ -7,6 +7,6 @@ import scrapy
 
 
 class WebSiteInfoItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    logo = scrapy.Field()
+    phone = scrapy.Field()
+    website = scrapy.Field()
