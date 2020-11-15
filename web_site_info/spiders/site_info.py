@@ -1,7 +1,7 @@
 import re
 import scrapy
 
-from web_site_info.items import WebSiteInfoItem, WebSiteInfoItemLoader
+from web_site_info.items import WebSiteInfoItem
 
 IMG_LOGO_XPATH = '//img[contains(@src, "logo")]/@src'
 CONTACT_XPATH = '//a[contains(@href, "contact")]/@href'
@@ -18,18 +18,17 @@ class SiteInfoSpider(scrapy.Spider):
         path_logo = self.extract_logo_path(response)
         phones = self.extract_phones(response)
 
-        site_info = WebSiteInfoItemLoader(item=WebSiteInfoItem(), response=response)
-        site_info.add_value('logo', path_logo)
-        site_info.add_value('phones', phones)
-        site_info.add_value('website', response.url)
-        yield site_info.load_item()
+        return WebSiteInfoItem(logo=path_logo, phones=phones, website=response.url)
 
     def extract_logo_path(self, response):
         logo_path = response.urljoin(response.xpath(IMG_LOGO_XPATH).extract_first())
-        yield logo_path
+        return logo_path
 
     def extract_phones(self, response):
         page_text = response.xpath('normalize-space(//body)').extract_first()
+
         phones_pattern = r'[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*'
         phones = list(set(re.findall(phones_pattern, page_text)))
-        yield phones
+
+        sanitize = r'[+()\s]|[0-9]'
+        return ["".join(re.findall(sanitize, phone)) for phone in phones]
