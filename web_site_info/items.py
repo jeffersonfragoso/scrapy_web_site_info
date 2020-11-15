@@ -6,7 +6,7 @@
 import re
 import scrapy
 
-from itemloaders.processors import Compose
+from itemloaders.processors import MapCompose
 from scrapy.loader import ItemLoader
 
 class WebSiteInfoItem(scrapy.Item):
@@ -27,4 +27,4 @@ class WebSiteInfoItemLoader(ItemLoader):
         pattern = r'[+()\s]|[0-9]'
         return ["".join(re.findall(pattern, phone)) for phone in phones]
 
-    phones_in = Compose(sanitize_phone)
+    phones_in = MapCompose(sanitize_phone)
