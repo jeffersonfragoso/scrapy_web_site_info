@@ -6,9 +6,20 @@ from web_site_info.items import WebSiteInfoItem
 IMG_LOGO_XPATH = '//img[contains(@src, "logo")]/@src'
 CONTACT_XPATH = '//a[contains(@href, "contact")]/@href'
 
+
 class SiteInfoSpider(scrapy.Spider):
     name = 'site_info'
-    start_urls = ['https://www.phosagro.com/', 'https://www.cmsenergy.com/']
+
+    custom_settings = {
+          'COOKIES_ENABLED': False,
+          'RETRY_ENABLED': False,
+          'LOG_STDOUT': True,
+          'LOG_LEVEL': 'INFO',
+          'SCHEDULER_PRIORITY_QUEUE': 'scrapy.pqueues.DownloaderAwarePriorityQueue'
+    }
+
+    def start_requests(self):
+        yield scrapy.Request(self.url)
 
     def parse(self, response):
         page_contact = response.xpath(CONTACT_XPATH).extract_first()
@@ -18,7 +29,7 @@ class SiteInfoSpider(scrapy.Spider):
         path_logo = self.extract_logo_path(response)
         phones = self.extract_phones(response)
 
-        return WebSiteInfoItem(logo=path_logo, phones=phones, website=response.url)
+        return WebSiteInfoItem(logo=path_logo, phones=phones, website=response.url).__dict__
 
     def extract_logo_path(self, response):
         logo_path = response.urljoin(response.xpath(IMG_LOGO_XPATH).extract_first())
